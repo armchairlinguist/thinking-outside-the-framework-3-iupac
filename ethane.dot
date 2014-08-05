@@ -1,0 +1,17 @@
+graph "" {
+    a0 [label=C];
+    a1 [label=H];
+      a1 -- a0;
+    a2 [label=H];
+      a2 -- a0;
+    a3 [label=H];
+      a3 -- a0;
+    a4 [label=C];
+      a4 -- a0;
+    a5 [label=H];
+      a5 -- a4;
+    a6 [label=H];
+      a6 -- a4;
+    a7 [label=H];
+      a7 -- a4;
+}
