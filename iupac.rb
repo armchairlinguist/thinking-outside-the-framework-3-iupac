@@ -1,3 +1,6 @@
+
+
+
 #
 # The basic data objects
 #
@@ -53,6 +56,10 @@ class Moiety
   end
 end
 
+
+
+
+
 #
 # A little DSL to let us construct interesting examples
 #
@@ -78,7 +85,9 @@ class Moiety
     parts.each_with_index { |x,i| join[self,i,x] }
   end
   def hydrated
-    atoms.each { |a| atoms << H[a].atoms[0] while a.bonds.count < a.element.valence }
+    atoms.each { |a|
+      atoms << H[a].atoms[0] while a.bonds.count < a.element.valence
+    }
     self
   end
 end
@@ -104,6 +113,10 @@ class Fixnum
     (1..self).map(&blk)
   end
 end
+
+
+
+
 
 #
 # Some pretty printing suport
