@@ -21,4 +21,4 @@ to make a png for github.  On many systems you can just display the xxxx.dot fil
 * Some test cases
 
 Since we're going to be working on a totally new aspect (IUPAC naming) you only really need to
-understand the first section--the rest are just there for fun, and to provide a little context.
+understand the first section (~40 lines)--the rest are just there for fun, and to provide a little context.
