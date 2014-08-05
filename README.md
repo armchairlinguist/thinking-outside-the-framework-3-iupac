@@ -8,9 +8,10 @@ The code is only ~100 lines of substance and ~50 of packing material, broken up 
 * A little DSL for creating interesting molecules, letting us write things like:
     water = O[H,H]
     ethanol = C[C,O[H]].hydrated
-* Pretty printing support, which lets us produce graphviz such as:
+* Pretty printing support, which lets us produce graphviz such as (by running the ruby and then chaining
+ graphviz & ImageMagick like so: `neato benzene.dot -T png | convert - -scale 50% benzene.png`):
 
-![benzene](benzene.png  =250x)
+![benzene](benzene.png)
 
 * Some test cases
 
