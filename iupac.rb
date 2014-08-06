@@ -46,6 +46,8 @@ class Atom
     element.to_s
   end
 
+  # FIXME: Allows bonding self to self,
+  # FIXME: Allows exceeding atom's valence when bonding.
   def bond(other)
     @bonds << other
     other.bonds << self
