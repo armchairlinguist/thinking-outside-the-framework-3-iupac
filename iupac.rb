@@ -1,11 +1,9 @@
-
-
-
 #
 # The basic data objects
 #
 class Element
   attr_reader :name,:symbol,:mass,:valence,:skeletal
+
   def initialize(n,s,m,v,sk=false)
     @name = n
     @symbol = s
@@ -14,6 +12,19 @@ class Element
     @skeletal = sk
     Object.const_set(s,self)
   end
+
+  def to_s
+    symbol
+  end
+
+  def atoms
+    [Atom.new(self)]
+  end
+
+  def [](*neighbors)
+    Moiety.new(self,*neighbors) { |m,i,x| m.atoms[0].bond(x[0]) if i > 0 }
+  end
+
 end
 
 Element.new("Hydrogen","H",  1.0, 1)
@@ -25,71 +36,55 @@ Element.new("Chlorine","Cl",35.5, 1)
 class Atom
   attr_reader :element
   attr_reader :bonds   # array of atoms to which this one is bonded.
+
   def initialize(e)
     @element = e
     @bonds = []
   end
+
+  def to_s
+    element.to_s
+  end
+
   def bond(other)
     @bonds << other
     other.bonds << self
     self
   end
+
+  def atoms
+    [self]
+  end
+
 end
 
 class Moiety
   attr_reader :atoms
-end
 
-#
-# A few simple examples of how we might compute with them
-#
-class Moiety
+  def initialize(*moieties,&join)
+    parts = moieties.map(&:atoms)
+    @atoms = parts.flatten
+    parts.each_with_index { |x,i| join[self,i,x] }
+  end
+
   def mass
     atoms.map { |a| a.element.mass }.inject(&:+)
   end
-  def emperical_formula
+  def empirical_formula
     atoms.
       each_with_object(Hash.new(0)) { |a,counts| counts[a.element] += 1 }.
       map { |e,n| "#{e}#{n > 1 ? n : ''}"}.
       sort.
       join
   end
-end
 
-
-
-
-
-#
-# A little DSL to let us construct interesting examples
-#
-class Element
-  def atoms
-    [Atom.new(self)]
-  end
-  def [](*neighbors)
-    Moiety.new(self,*neighbors) { |m,i,x| m.atoms[0].bond(x[0]) if i > 0 }
-  end
-end
-
-class Atom
-  def atoms
-    [self]
-  end
-end
-
-class Moiety
-  def initialize(*moieties,&join)
-    parts = moieties.map(&:atoms)
-    @atoms = parts.flatten
-    parts.each_with_index { |x,i| join[self,i,x] }
-  end
   def hydrated
     atoms.each { |a|
       atoms << H[a].atoms[0] while a.bonds.count < a.element.valence
     }
     self
   end
+
 end
 
 def chain(*moieties,&join)
@@ -114,24 +109,7 @@ class Fixnum
   end
 end
 
-
-
-
-
-#
-# Some pretty printing suport
-#
-class Element
-  def to_s
-    symbol
-  end
-end
-
-class Atom
-  def to_s
-    element.to_s
-  end
-end
+# I probably don't need this, but might be useful for visualizing.
 
 class Moiety
   def dot(file_name)
@@ -157,11 +135,11 @@ end
 
 water = O[H,H]
 p water.mass
-p water.emperical_formula
+p water.empirical_formula
 
 ethane = C[H,H,H,C[H,H,H]]
 p ethane.mass
-p ethane.emperical_formula
+p ethane.empirical_formula
 ethane.dot('ethane.dot')
 
 octane = chain(*8.of {C}).hydrated
