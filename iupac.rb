@@ -27,12 +27,6 @@ class Element
 
 end
 
-Element.new("Hydrogen","H",  1.0, 1)
-Element.new("Carbon",  "C", 12.0, 4,true)
-Element.new("Nitrogen","N", 14.0, 3,true)
-Element.new("Oxygen",  "O", 16.0, 2)
-Element.new("Chlorine","Cl",35.5, 1)
-
 class Atom
   attr_reader :element
   attr_reader :bonds   # array of atoms to which this one is bonded.
@@ -46,14 +40,20 @@ class Atom
     element.to_s
   end
 
-  # FIXME: Allows bonding self to self,
-  # FIXME: Allows exceeding atom's valence when bonding.
+  # Can bond one element to another more than once.
   def bond(other)
+    raise "Can't bond an atom to itself." if self == other
+    raise "Can't bond to any more atoms" if (self.saturated? || other.saturated?)
     @bonds << other
     other.bonds << self
     self
   end
-
+  
+  def saturated?
+    valence = self.element.valence
+    @bonds.length == valence
+  end
+  
   def atoms
     [self]
   end
@@ -105,6 +105,13 @@ def ring(*moieties,&join)
   }
 end
 
+# I'd like to do something clever with splats here, but this'll do for now.
+def unbond(atom1,atom2)
+  atom1.bonds.delete(atom2)
+  atom2.bonds.delete(atom1)
+  [atom1.bonds, atom2.bonds]
+end
+
 class Fixnum
   def of(&blk)
     (1..self).map(&blk)
@@ -135,6 +142,13 @@ end
 # A few examples / test cases
 #
 
+Element.new("Hydrogen","H",  1.0, 1)
+Element.new("Carbon",  "C", 12.0, 4,true)
+Element.new("Nitrogen","N", 14.0, 3,true)
+Element.new("Oxygen",  "O", 16.0, 2)
+Element.new("Chlorine","Cl",35.5, 1)
+Element.new("Silicon","Si",28.08,4, true)
+
 water = O[H,H]
 p water.mass
 p water.empirical_formula
@@ -142,13 +156,9 @@ p water.empirical_formula
 ethane = C[H,H,H,C[H,H,H]]
 p ethane.mass
 p ethane.empirical_formula
-ethane.dot('ethane.dot')
 
 octane = chain(*8.of {C}).hydrated
-octane.dot('octane.dot')
 
 cyclohexane = ring(*6.of {C}).hydrated
-cyclohexane.dot('cyclohexane.dot')
 
 benzene = ring(*6.of {C}) {|m,i,x,l| l.bond(x[0]) if i.odd? }.hydrated
-benzene.dot('benzene.dot')
